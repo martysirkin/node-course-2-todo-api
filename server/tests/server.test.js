@@ -122,7 +122,7 @@ describe('DELETE /todos:id', () => {
                 }
  
                 Todo.findById(hexId).then((todo) => {
-                     expect(todo).toBe(null);
+                     expect(todo).toBeFalsy();
                     done();
             }).catch((e) => done(e));
         });
@@ -182,8 +182,8 @@ describe('PATCH /todos:id', () => {
             .expect((res) => {
                 expect(res.body.todo.text).toBe(text);
                 expect(res.body.todo.completed).toBe(true);
-                // New version expect(res.body.todo.completedAt).toBeA('number')
-            })
+                expect(typeof res.body.todo.completedAt).toBe('number')
+              })
             .end(done);
     });
 
@@ -217,8 +217,8 @@ describe('PATCH /todos:id', () => {
             .expect((res) => {
                 expect(res.body.todo.text).toBe(text);
                 expect(res.body.todo.completed).toBe(false);
-                //expect(res.body.todo.completedAt).toNotExist();
-            })
+                expect(res.body.todo.completedAt).toBeFalsy();
+             })
             .end(done);
     });
 });
@@ -268,7 +268,7 @@ describe('POST /users', () => {
 
                 User.findOne({email}).then((user) => {
                     expect(user).toBeTruthy();
-                     //expect(user.password).toNotEqual(password);
+                    expect(user.password).not.toBe(password);
                     done();
                 }).catch((e) => done(e));
             });
@@ -312,8 +312,12 @@ describe('POST /users/login', () => {
                 }
 
                 User.findById(users[1]._id).then((user) => {
-                    expect(user.tokens[1].access).toEqual('auth')
-                    expect(user.tokens[1].token).toEqual(res.headers['x-auth'])               
+                    expect(user.toObject().tokens[1]).toMatchObject({
+                        access: 'auth',
+                        token: res.headers['x-auth']
+                    });
+                    // expect(user.tokens[1].access).toEqual('auth')
+                    // expect(user.tokens[1].token).toEqual(res.headers['x-auth'])               
                     done();
                 }).catch((e) => done(e));
               });
